@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public class TankMovement : MonoBehaviour
 {
+    public static TankMovement tankMovement;
 
     public int m_PlayerNumber = 1;         
     public float m_Speed = 12f;            
@@ -22,6 +24,7 @@ public class TankMovement : MonoBehaviour
 
     private void Awake()
     {
+        tankMovement = this;
         m_Rigidbody = GetComponent<Rigidbody>();
     }
 
@@ -95,5 +98,15 @@ public class TankMovement : MonoBehaviour
         float turn = m_TurnInputValue * m_TurnSpeed * Time.deltaTime;
         Quaternion turnRotation = Quaternion.Euler(0f, turn, 0f);
         m_Rigidbody.MoveRotation(m_Rigidbody.rotation * turnRotation);
+    }
+
+    public void increaseSpeed() {
+        m_Speed += 5;
+        StartCoroutine(removeEffect());
+    }
+
+    IEnumerator removeEffect() {
+        yield return new WaitForSeconds(5f);
+        m_Speed -= 5;
     }
 }
