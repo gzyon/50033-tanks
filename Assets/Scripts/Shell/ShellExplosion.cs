@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using UnityEngine.Events;
 
 public class ShellExplosion : MonoBehaviour
 {
@@ -9,8 +11,8 @@ public class ShellExplosion : MonoBehaviour
     public float m_MaxDamage = 100f;                  
     public float m_ExplosionForce = 1000f;            
     public float m_MaxLifeTime = 2f;                  
-    public float m_ExplosionRadius = 5f;              
-
+    public float m_ExplosionRadius = 5f;    
+    public UnityEvent onTankDeath;
 
     private void Start()
     {
@@ -35,6 +37,14 @@ public class ShellExplosion : MonoBehaviour
 
             float damage = CalculateDamage(targetRigidbody.position);
             targetHealth.TakeDamage(damage);
+            
+            if (targetHealth.GetHealth() <= 0) {
+                Debug.Log(this.gameObject.transform.parent.gameObject.name);
+                if (this.gameObject.transform.parent.gameObject.name == "PlayerTank(Clone)") {
+                    Debug.Log(GameManager.gameManager);
+                    GameManager.gameManager.IncreaseScore();
+                }
+            }
         }
 
         m_ExplosionParticles.transform.parent = null;

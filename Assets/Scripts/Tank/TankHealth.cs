@@ -63,4 +63,8 @@ public class TankHealth : MonoBehaviour
 
         gameObject.SetActive(false);
     }
+
+    public float GetHealth() {
+        return m_CurrentHealth;
+    }
 }

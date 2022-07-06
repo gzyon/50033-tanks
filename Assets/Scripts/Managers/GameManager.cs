@@ -4,18 +4,26 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager gameManager;
     public int m_NumRoundsToWin = 5;            
     public float m_StartDelay = 3f;             
     public float m_EndDelay = 3f;               
-    public CameraControl m_CameraControl;       
-    public Text m_MessageText;                  
+    public CameraControl m_CameraControl;
+    public Text m_MessageText;    
+    public Text tanksKilled;
+    private int score = 0;
+    public Text tanksRemaining;              
     public GameObject[] m_TankPrefabs;
     public TankManager[] m_Tanks;               
     public List<Transform> wayPointsForAI;
+    public TextMeshProUGUI moveInstructions1;
+    public TextMeshProUGUI moveInstructions2;
+    public TextMeshProUGUI attachInstructions;
 
     private int m_RoundNumber;                  
     private WaitForSeconds m_StartWait;         
@@ -23,9 +31,16 @@ public class GameManager : MonoBehaviour
     private TankManager m_RoundWinner;          
     private TankManager m_GameWinner;           
 
+    void  Awake(){
+		gameManager  =  this;
+	}
 
     private void Start()
     {
+        moveInstructions1.gameObject.SetActive(false);
+        moveInstructions2.gameObject.SetActive(false);
+        attachInstructions.gameObject.SetActive(false);
+
         m_StartWait = new WaitForSeconds(m_StartDelay);
         m_EndWait = new WaitForSeconds(m_EndDelay);
 
@@ -83,7 +98,16 @@ public class GameManager : MonoBehaviour
         m_CameraControl.SetStartPositionAndSize();
 
         m_RoundNumber++;
-        m_MessageText.text = $"ROUND {m_RoundNumber}";
+        if (m_RoundNumber == 1) { 
+            Debug.Log("round 1");       
+            m_MessageText.text = $"ROUND {m_RoundNumber}";
+            moveInstructions1.gameObject.SetActive(true);
+            moveInstructions2.gameObject.SetActive(true);
+            attachInstructions.gameObject.SetActive(true);
+        } else {
+            Debug.Log("not round 1");
+            m_MessageText.text = $"ROUND {m_RoundNumber}";   
+        }
 
         yield return m_StartWait;
     }
@@ -94,8 +118,19 @@ public class GameManager : MonoBehaviour
         EnableTankControl();
 
         m_MessageText.text = string.Empty;
+        
+        moveInstructions1.gameObject.SetActive(false);
+        moveInstructions2.gameObject.SetActive(false);
+        attachInstructions.gameObject.SetActive(false);
+        tanksKilled.gameObject.SetActive(true);
+        tanksRemaining.gameObject.SetActive(true);
+        tanksKilled.text = "Tanks Killed: " + score.ToString();
+        tanksRemaining.text = $"Tanks Remaining: {m_Tanks.Length}";
 
-        while (!OneTankLeft()) yield return null;
+        while (!OneTankLeft()) {
+            tanksRemaining.text = $"Tanks Remaining: {numTanksInPlay()}";
+            yield return null;
+        }
     }
 
 
@@ -110,21 +145,29 @@ public class GameManager : MonoBehaviour
 
         m_GameWinner = GetGameWinner();
 
+
+        // tanksKilled.text = string.Empty;
+        tanksRemaining.text = string.Empty;
         string message = EndMessage();
         m_MessageText.text = message;
 
         yield return m_EndWait;
     }
 
-
-    private bool OneTankLeft()
-    {
+    private int numTanksInPlay() {
         int numTanksLeft = 0;
 
         for (int i = 0; i < m_Tanks.Length; i++)
         {
             if (m_Tanks[i].m_Instance.activeSelf) numTanksLeft++;
         }
+
+        return numTanksLeft;
+    }
+
+    private bool OneTankLeft()
+    {
+        int numTanksLeft = numTanksInPlay();
 
         return numTanksLeft <= 1;
     }
@@ -189,4 +232,10 @@ public class GameManager : MonoBehaviour
     {
         for (int i = 0; i < m_Tanks.Length; i++) m_Tanks[i].DisableControl();
     }
+
+    public void IncreaseScore() {
+        score++;
+        tanksKilled.text = "Tanks Killed: " + score.ToString();
+    }
+
 }

@@ -3,7 +3,6 @@
 [CreateAssetMenu(menuName = "PluggableAI/State")]
 public class State : ScriptableObject
 {
-
 	public Action[] actions;
 	public Transition[] transitions;
 	public Color sceneGizmoColor = Color.grey;

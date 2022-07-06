@@ -19,6 +19,7 @@ public class TankShooting : MonoBehaviour
     private float m_ChargeSpeed;
     private bool m_Fired;
     private float nextFireTime;
+    private TankMana tankMana;
 
     private void OnEnable()
     {
@@ -31,6 +32,7 @@ public class TankShooting : MonoBehaviour
     {
         m_FireButton = "Fire" + m_PlayerNumber;
         m_ChargeSpeed = (m_MaxLaunchForce - m_MinLaunchForce) / m_MaxChargeTime;
+        tankMana = GetComponent<TankMana>();
     }
 
 
@@ -58,7 +60,8 @@ public class TankShooting : MonoBehaviour
         }
         else if (Input.GetButtonUp(m_FireButton) && !m_Fired)
         {
-            Fire(m_CurrentLaunchForce, 1);
+            if (tankMana.GetMana() >= 10f)
+                Fire(m_CurrentLaunchForce, 1);
         }
     }
 
@@ -72,12 +75,14 @@ public class TankShooting : MonoBehaviour
 
         Rigidbody shellInstance =
             Instantiate(m_Shell, m_FireTransform.position, m_FireTransform.rotation) as Rigidbody;
+        shellInstance.transform.parent = gameObject.transform;
         shellInstance.velocity = m_CurrentLaunchForce * m_FireTransform.forward;
 
         m_ShootingAudio.clip = m_FireClip;
         m_ShootingAudio.Play();
 
         m_CurrentLaunchForce = m_MinLaunchForce;
+        tankMana.LoseMana(10);
     }
     
 }
